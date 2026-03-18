@@ -76,14 +76,12 @@ if [ -n "${ANTHROPIC_SETUP_TOKEN:-}" ]; then
   mkdir -p "${AUTH_DIR}"
   cat > "${AUTH_DIR}/auth-profiles.json" <<AUTHEOF
 {
+  "version": 1,
   "profiles": {
     "anthropic:setup-token": {
+      "type": "token",
       "provider": "anthropic",
-      "credentials": {
-        "type": "token",
-        "provider": "anthropic",
-        "token": "${ANTHROPIC_SETUP_TOKEN}"
-      }
+      "token": "${ANTHROPIC_SETUP_TOKEN}"
     }
   },
   "order": {
