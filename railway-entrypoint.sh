@@ -72,9 +72,26 @@ export HOME="/root"
 # Configure Anthropic setup-token auth if provided
 if [ -n "${ANTHROPIC_SETUP_TOKEN:-}" ]; then
   echo "==> Configuring Anthropic setup-token auth..."
-  openclaw onboard --auth-choice token --token-provider anthropic --token "${ANTHROPIC_SETUP_TOKEN}" --yes 2>&1 || \
-    openclaw models auth paste-token --provider anthropic <<< "${ANTHROPIC_SETUP_TOKEN}" 2>&1 || \
-    echo "WARNING: Could not configure setup-token automatically"
+  AUTH_DIR="${STATE_DIR}/agents/main/agent"
+  mkdir -p "${AUTH_DIR}"
+  cat > "${AUTH_DIR}/auth-profiles.json" <<AUTHEOF
+{
+  "profiles": {
+    "anthropic:setup-token": {
+      "provider": "anthropic",
+      "credentials": {
+        "type": "token",
+        "provider": "anthropic",
+        "token": "${ANTHROPIC_SETUP_TOKEN}"
+      }
+    }
+  },
+  "order": {
+    "anthropic": ["anthropic:setup-token"]
+  }
+}
+AUTHEOF
+  echo "==> Auth profile written to ${AUTH_DIR}/auth-profiles.json"
 fi
 
 # Reverse proxy: Railway $PORT -> gateway 18789
