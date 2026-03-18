@@ -25,7 +25,7 @@ if [ ! -f "${CONFIG_FILE}" ]; then
   cat > "${CONFIG_FILE}" <<EOF
 {
   "gateway": {
-    "mode": "local", "bind": "all", "port": 18789,
+    "mode": "local", "bind": "lan", "port": 18789,
     "auth": { "token": "${OPENCLAW_GATEWAY_TOKEN}" },
     "controlUi": { "allowedOrigins": ["*"] }
   },
@@ -109,6 +109,6 @@ PROXYEOF
 node /tmp/proxy.js &
 echo "==> Starting OpenClaw gateway..."
 exec openclaw gateway \
-  --port 18789 --bind all \
-  --state-dir "${STATE_DIR}" \
-  --workspace-dir "${WORKSPACE_DIR}"
+  --port 18789 --bind lan \
+  --token "${OPENCLAW_GATEWAY_TOKEN}" \
+  --allow-unconfigured
