@@ -26,6 +26,7 @@ if true; then
 {
   "gateway": {
     "mode": "local", "bind": "lan", "port": 18789,
+    "trustedProxies": ["127.0.0.1", "::1"],
     "auth": { "token": "${OPENCLAW_GATEWAY_TOKEN}" },
     "controlUi": { "allowedOrigins": ["*"] }
   },
@@ -77,8 +78,11 @@ const server = http.createServer((req, res) => {
     res.writeHead(200,{"Content-Type":"application/json"});
     return res.end(JSON.stringify({ok:true}));
   }
+  const h = Object.assign({},req.headers);
+  delete h["x-forwarded-for"]; delete h["x-forwarded-proto"];
+  delete h["x-forwarded-host"]; delete h["x-forwarded-port"];
   const o = {hostname:"127.0.0.1",port:18789,
-    path:req.url,method:req.method,headers:req.headers};
+    path:req.url,method:req.method,headers:h};
   const p = http.request(o, r => {
     res.writeHead(r.statusCode,r.headers);
     r.pipe(res,{end:true});
@@ -90,8 +94,11 @@ const server = http.createServer((req, res) => {
   req.pipe(p,{end:true});
 });
 server.on("upgrade",(req,socket)=>{
+  const h2=Object.assign({},req.headers);
+  delete h2["x-forwarded-for"]; delete h2["x-forwarded-proto"];
+  delete h2["x-forwarded-host"]; delete h2["x-forwarded-port"];
   const o={hostname:"127.0.0.1",port:18789,
-    path:req.url,method:req.method,headers:req.headers};
+    path:req.url,method:req.method,headers:h2};
   const p=http.request(o);
   p.on("upgrade",(r,s)=>{
     socket.write("HTTP/1.1 101 Switching Protocols\r\n"
