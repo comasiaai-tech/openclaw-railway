@@ -69,6 +69,14 @@ export OPENCLAW_STATE_DIR="${STATE_DIR}"
 export OPENCLAW_WORKSPACE_DIR="${WORKSPACE_DIR}"
 export HOME="/root"
 
+# Configure Anthropic setup-token auth if provided
+if [ -n "${ANTHROPIC_SETUP_TOKEN:-}" ]; then
+  echo "==> Configuring Anthropic setup-token auth..."
+  openclaw onboard --auth-choice token --token-provider anthropic --token "${ANTHROPIC_SETUP_TOKEN}" --yes 2>&1 || \
+    openclaw models auth paste-token --provider anthropic <<< "${ANTHROPIC_SETUP_TOKEN}" 2>&1 || \
+    echo "WARNING: Could not configure setup-token automatically"
+fi
+
 # Reverse proxy: Railway $PORT -> gateway 18789
 cat > /tmp/proxy.js <<'PROXYEOF'
 const http = require("http");
