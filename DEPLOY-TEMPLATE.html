@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OpenClaw on Railway - Deployment Template</title>
+<style>
+  :root { --bg: #0d1117; --card: #161b22; --border: #30363d; --text: #e6edf3; --muted: #8b949e; --accent: #58a6ff; --green: #3fb950; --orange: #d29922; --red: #f85149; --code-bg: #1c2128; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; line-height: 1.6; padding: 2rem; max-width: 900px; margin: 0 auto; }
+  h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+  h2 { font-size: 1.4rem; margin: 2rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border); color: var(--accent); }
+  h3 { font-size: 1.1rem; margin: 1.5rem 0 0.5rem; }
+  p, li { color: var(--muted); margin-bottom: 0.5rem; }
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: 600; }
+  .badge-green { background: #23292f; color: var(--green); border: 1px solid var(--green); }
+  .badge-orange { background: #23292f; color: var(--orange); border: 1px solid var(--orange); }
+  .badge-red { background: #23292f; color: var(--red); border: 1px solid var(--red); }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 1.25rem; margin: 1rem 0; }
+  .warn { border-left: 3px solid var(--orange); }
+  .success { border-left: 3px solid var(--green); }
+  .danger { border-left: 3px solid var(--red); }
+  pre { background: var(--code-bg); border: 1px solid var(--border); border-radius: 6px; padding: 1rem; overflow-x: auto; margin: 0.75rem 0; font-size: 0.85rem; line-height: 1.5; }
+  code { font-family: 'SF Mono', 'Fira Code', Consolas, monospace; font-size: 0.85rem; }
+  .inline-code { background: var(--code-bg); padding: 2px 6px; border-radius: 4px; border: 1px solid var(--border); }
+  ol, ul { padding-left: 1.5rem; }
+  ol li, ul li { margin-bottom: 0.75rem; }
+  table { width: 100%; border-collapse: collapse; margin: 1rem 0; }
+  th, td { padding: 0.5rem 0.75rem; text-align: left; border: 1px solid var(--border); }
+  th { background: var(--card); color: var(--text); }
+  td { color: var(--muted); }
+  .step-num { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; background: var(--accent); color: var(--bg); border-radius: 50%; font-weight: 700; font-size: 0.85rem; margin-right: 8px; }
+  .toc { list-style: none; padding: 0; }
+  .toc li { margin: 0.4rem 0; }
+  .toc a { color: var(--accent); text-decoration: none; }
+  .toc a:hover { text-decoration: underline; }
+  a { color: var(--accent); }
+  .header-meta { color: var(--muted); font-size: 0.9rem; margin-bottom: 2rem; }
+  .file-label { display: inline-block; background: var(--accent); color: var(--bg); font-size: 0.75rem; font-weight: 700; padding: 2px 8px; border-radius: 4px 4px 0 0; margin-bottom: -1px; position: relative; z-index: 1; }
+  .copy-hint { float: right; color: var(--muted); font-size: 0.75rem; font-style: italic; }
+</style>
+</head>
+<body>
+
+<h1>OpenClaw on Railway - Deployment Template</h1>
+<p class="header-meta">Battle-tested template with all fixes baked in. Zero errors on fresh deploy.<br>
+Last updated: March 2026 | OpenClaw latest | Railway Hobby Plan ($5/mo)</p>
+
+<div class="card success">
+  <strong>What this template gives you:</strong>
+  <ul style="margin-top:0.5rem">
+    <li>OpenClaw AI gateway accessible via web browser</li>
+    <li>Telegram bot integration (optional)</li>
+    <li>Claude subscription auth (setup-token) - <strong>no API key needed</strong></li>
+    <li>Fallback API keys: AWS Bedrock, Google AI Studio, OpenAI, Brave Search</li>
+    <li>Airtable MCP server integration (coming soon - pending OpenClaw release)</li>
+    <li>Auto-deploy from GitHub on push</li>
+  </ul>
+</div>
+
+<h2>Table of Contents</h2>
+<ul class="toc">
+  <li><a href="#prereqs">Prerequisites</a></li>
+  <li><a href="#step1">Step 1: Create GitHub Repo (3 files)</a></li>
+  <li><a href="#step2">Step 2: Create Railway Project</a></li>
+  <li><a href="#step3">Step 3: Set Environment Variables</a></li>
+  <li><a href="#step4">Step 4: Add Persistent Volume</a></li>
+  <li><a href="#step5">Step 5: Deploy &amp; Verify</a></li>
+  <li><a href="#step6">Step 6: Get Your Gateway Token</a></li>
+  <li><a href="#customize">Customization Guide</a></li>
+  <li><a href="#troubleshoot">Troubleshooting (Known Fixes)</a></li>
+  <li><a href="#env-reference">Environment Variable Reference</a></li>
+</ul>
+
+<!-- ===== PREREQUISITES ===== -->
+<h2 id="prereqs">Prerequisites</h2>
+<ul>
+  <li><strong>Railway account</strong> - Hobby plan ($5/mo) at <a href="https://railway.app">railway.app</a></li>
+  <li><strong>GitHub account</strong> - Free, to host the 3 deployment files</li>
+  <li><strong>Claude subscription</strong> (Pro/Max) - For setup-token auth (free usage with your subscription)</li>
+  <li><strong>Telegram bot token</strong> (optional) - From <a href="https://t.me/BotFather">@BotFather</a></li>
+</ul>
+
+<h3>Get your Claude setup-token</h3>
+<div class="card">
+  <p>If you have a Claude Pro or Max subscription, you can generate a setup token to authenticate without an API key:</p>
+  <ol>
+    <li>Open a terminal and install Claude CLI: <code class="inline-code">npm install -g @anthropic-ai/claude-code</code></li>
+    <li>Run: <code class="inline-code">claude setup-token</code></li>
+    <li>Follow the prompts to authenticate</li>
+    <li>Copy the token (starts with <code class="inline-code">sk-ant-oat01-...</code>)</li>
+  </ol>
+</div>
+
+<!-- ===== STEP 1 ===== -->
+<h2 id="step1"><span class="step-num">1</span> Create GitHub Repo (3 Files)</h2>
+<p>Create a new GitHub repo (e.g., <code class="inline-code">openclaw-railway</code>) with these 3 files:</p>
+
+<h3><span class="file-label">Dockerfile</span></h3>
+<pre><code># Install OpenClaw from npm for Railway
+# Pulls latest stable release automatically
+
+FROM node:22-bookworm
+
+# Install OpenClaw globally
+RUN npm install -g openclaw@latest
+
+# Install utilities
+RUN apt-get update && apt-get install -y --no-install-recommends jq openssl && \
+    rm -rf /var/lib/apt/lists/*
+
+# Create persistent directories
+RUN mkdir -p /data/.openclaw /data/workspace
+
+# Copy startup script
+COPY railway-entrypoint.sh /app/railway-entrypoint.sh
+RUN chmod +x /app/railway-entrypoint.sh
+
+# Defaults
+ENV NODE_ENV=production
+ENV OPENCLAW_STATE_DIR=/data/.openclaw
+ENV OPENCLAW_WORKSPACE_DIR=/data/workspace
+
+EXPOSE ${PORT:-8080}
+ENTRYPOINT ["/app/railway-entrypoint.sh"]</code></pre>
+
+<h3><span class="file-label">railway.toml</span></h3>
+<pre><code>[build]
+dockerfilePath = "Dockerfile"
+
+[deploy]
+healthcheckPath = "/healthz"
+healthcheckTimeout = 300
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 5</code></pre>
+
+<h3><span class="file-label">railway-entrypoint.sh</span> <span class="copy-hint">Copy this exactly - all fixes are baked in</span></h3>
+<pre><code>#!/usr/bin/env bash
+set -euo pipefail
+
+STATE_DIR="${OPENCLAW_STATE_DIR:-/data/.openclaw}"
+WORKSPACE_DIR="${OPENCLAW_WORKSPACE_DIR:-/data/workspace}"
+CONFIG_FILE="${STATE_DIR}/openclaw.json"
+PORT="${PORT:-8080}"
+
+# Auto-generate gateway token if not set
+if [ -z "${OPENCLAW_GATEWAY_TOKEN:-}" ]; then
+  if [ -f "${STATE_DIR}/.gateway-token" ]; then
+    OPENCLAW_GATEWAY_TOKEN=$(cat "${STATE_DIR}/.gateway-token")
+  else
+    OPENCLAW_GATEWAY_TOKEN=$(openssl rand -hex 32)
+  fi
+fi
+
+mkdir -p "${STATE_DIR}" "${WORKSPACE_DIR}"
+echo -n "${OPENCLAW_GATEWAY_TOKEN}" > "${STATE_DIR}/.gateway-token"
+
+# Always regenerate config to pick up env var changes
+# IMPORTANT: Must always overwrite - never use "if [ ! -f ]" check,
+# otherwise stale config on the volume will persist broken settings.
+if true; then
+  echo "==> Generating config..."
+  MODEL="${OPENCLAW_DEFAULT_MODEL:-anthropic/claude-sonnet-4-6}"
+
+  # Build optional sections
+  TELEGRAM_BLOCK=""
+  if [ -n "${TELEGRAM_BOT_TOKEN:-}" ]; then
+    TELEGRAM_BLOCK=$(cat &lt;&lt;TGEOF
+  "channels": {
+    "telegram": {
+      "botToken": "${TELEGRAM_BOT_TOKEN}",
+      "dmPolicy": "${TELEGRAM_DM_POLICY:-allowlist}",
+      "allowFrom": [${TELEGRAM_ALLOW_FROM:-}]
+    }
+  },
+TGEOF
+    )
+  fi
+
+  MCP_BLOCK=""
+  if [ -n "${AIRTABLE_API_KEY:-}" ]; then
+    MCP_BLOCK=$(cat &lt;&lt;MCPEOF
+  "mcp": {
+    "servers": {
+      "airtable": {
+        "command": "npx",
+        "args": ["-y", "@airtable/mcp-server"],
+        "env": {
+          "AIRTABLE_API_KEY": "${AIRTABLE_API_KEY}"
+        }
+      }
+    }
+  },
+MCPEOF
+    )
+  fi
+
+  cat > "${CONFIG_FILE}" &lt;&lt;EOF
+{
+  "gateway": {
+    "mode": "local", "bind": "lan", "port": 18789,
+    "trustedProxies": ["127.0.0.1", "::1"],
+    "auth": { "token": "${OPENCLAW_GATEWAY_TOKEN}" },
+    "controlUi": { "allowedOrigins": ["*"], "dangerouslyDisableDeviceAuth": true }
+  },
+  "agents": {
+    "defaults": {
+      "model": { "primary": "${MODEL}" },
+      "workspace": "${WORKSPACE_DIR}",
+      "maxConcurrent": 4,
+      "subagents": { "maxConcurrent": 8 }
+    }
+  },
+  "tools": {
+    "web": { "search": {"enabled":true}, "fetch": {"enabled":true} }
+  },
+  ${MCP_BLOCK}
+  ${TELEGRAM_BLOCK}
+  "_generated": true
+}
+EOF
+fi
+
+# Save API keys to persistent .env
+touch "${STATE_DIR}/.env"
+[ -n "${ANTHROPIC_API_KEY:-}" ] && \
+  grep -q "ANTHROPIC_API_KEY" "${STATE_DIR}/.env" 2>/dev/null || \
+  echo "ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}" >> "${STATE_DIR}/.env"
+[ -n "${OPENAI_API_KEY:-}" ] && \
+  grep -q "OPENAI_API_KEY" "${STATE_DIR}/.env" 2>/dev/null || \
+  echo "OPENAI_API_KEY=${OPENAI_API_KEY:-}" >> "${STATE_DIR}/.env"
+
+[ -f "${STATE_DIR}/.env" ] && { set -a; source "${STATE_DIR}/.env"; set +a; }
+
+echo ""
+echo "==========================================="
+echo "  OpenClaw on Railway"
+echo "==========================================="
+echo "  Model: ${OPENCLAW_DEFAULT_MODEL:-anthropic/claude-sonnet-4-6}"
+echo "  GATEWAY TOKEN (copy this!):"
+echo "  ${OPENCLAW_GATEWAY_TOKEN}"
+echo "==========================================="
+
+# CRITICAL: Export gateway token so embedded agents can connect back
+export OPENCLAW_STATE_DIR="${STATE_DIR}"
+export OPENCLAW_WORKSPACE_DIR="${WORKSPACE_DIR}"
+export OPENCLAW_GATEWAY_TOKEN="${OPENCLAW_GATEWAY_TOKEN}"
+export HOME="/root"
+
+# Configure Anthropic setup-token auth if provided
+if [ -n "${ANTHROPIC_SETUP_TOKEN:-}" ]; then
+  echo "==> Configuring Anthropic setup-token auth..."
+  AUTH_DIR="${STATE_DIR}/agents/main/agent"
+  mkdir -p "${AUTH_DIR}"
+  cat > "${AUTH_DIR}/auth-profiles.json" &lt;&lt;AUTHEOF
+{
+  "version": 1,
+  "profiles": {
+    "anthropic:setup-token": {
+      "type": "token",
+      "provider": "anthropic",
+      "token": "${ANTHROPIC_SETUP_TOKEN}"
+    }
+  },
+  "order": {
+    "anthropic": ["anthropic:setup-token"]
+  }
+}
+AUTHEOF
+  echo "==> Auth profile written to ${AUTH_DIR}/auth-profiles.json"
+fi
+
+# Reverse proxy: Railway $PORT -> gateway 18789
+# Strips forwarded headers so gateway sees requests as local/trusted
+cat > /tmp/proxy.js &lt;&lt;'PROXYEOF'
+const http = require("http");
+const PORT = process.env.PORT || 8080;
+const server = http.createServer((req, res) => {
+  if (req.url === "/healthz") {
+    res.writeHead(200,{"Content-Type":"application/json"});
+    return res.end(JSON.stringify({ok:true}));
+  }
+  const h = Object.assign({},req.headers);
+  delete h["x-forwarded-for"]; delete h["x-forwarded-proto"];
+  delete h["x-forwarded-host"]; delete h["x-forwarded-port"];
+  const o = {hostname:"127.0.0.1",port:18789,
+    path:req.url,method:req.method,headers:h};
+  const p = http.request(o, r => {
+    res.writeHead(r.statusCode,r.headers);
+    r.pipe(res,{end:true});
+  });
+  p.on("error", () => {
+    if(!res.headersSent){res.writeHead(502,{"Content-Type":"text/html"});
+    res.end("&lt;h2>Starting up...&lt;/h2>&lt;p>Refresh in a moment.&lt;/p>");}
+  });
+  req.pipe(p,{end:true});
+});
+server.on("upgrade",(req,socket)=>{
+  const h2=Object.assign({},req.headers);
+  delete h2["x-forwarded-for"]; delete h2["x-forwarded-proto"];
+  delete h2["x-forwarded-host"]; delete h2["x-forwarded-port"];
+  const o={hostname:"127.0.0.1",port:18789,
+    path:req.url,method:req.method,headers:h2};
+  const p=http.request(o);
+  p.on("upgrade",(r,s)=>{
+    socket.write("HTTP/1.1 101 Switching Protocols\r\n"
+      +Object.entries(r.headers).map(([k,v])=>k+": "+v).join("\r\n")
+      +"\r\n\r\n");
+    s.pipe(socket);socket.pipe(s);
+  });
+  p.on("error",()=>socket.end());
+  p.end();
+});
+server.listen(PORT,"0.0.0.0",()=>
+  console.log("Proxy: "+PORT+" -> 18789"));
+PROXYEOF
+
+node /tmp/proxy.js &
+echo "==> Starting OpenClaw gateway..."
+exec openclaw gateway \
+  --port 18789 --bind lan \
+  --token "${OPENCLAW_GATEWAY_TOKEN}" \
+  --allow-unconfigured</code></pre>
+
+<div class="card warn">
+  <strong>Important:</strong> The entrypoint file must have Unix line endings (LF, not CRLF). If you create it on Windows, use your editor's line ending setting or run <code class="inline-code">dos2unix railway-entrypoint.sh</code>.
+</div>
+
+<!-- ===== STEP 2 ===== -->
+<h2 id="step2"><span class="step-num">2</span> Create Railway Project</h2>
+<ol>
+  <li>Go to <a href="https://railway.app/dashboard">railway.app/dashboard</a></li>
+  <li>Click <strong>New Project</strong> &rarr; <strong>Deploy from GitHub Repo</strong></li>
+  <li>Select your <code class="inline-code">openclaw-railway</code> repo</li>
+  <li>Railway will detect the Dockerfile and start building</li>
+  <li><strong>Don't worry if the first build fails</strong> - we still need to add env vars and a volume</li>
+</ol>
+
+<!-- ===== STEP 3 ===== -->
+<h2 id="step3"><span class="step-num">3</span> Set Environment Variables</h2>
+<p>In Railway: click your service &rarr; <strong>Variables</strong> tab &rarr; add these:</p>
+
+<h3>Required (pick one auth method)</h3>
+<table>
+  <tr><th>Variable</th><th>Value</th><th>Notes</th></tr>
+  <tr>
+    <td><code>ANTHROPIC_SETUP_TOKEN</code></td>
+    <td><code>sk-ant-oat01-...</code></td>
+    <td>From <code>claude setup-token</code>. Free with Claude Pro/Max subscription.</td>
+  </tr>
+  <tr><td colspan="3" style="text-align:center;color:var(--muted)"><em>--- OR ---</em></td></tr>
+  <tr>
+    <td><code>ANTHROPIC_API_KEY</code></td>
+    <td><code>sk-ant-...</code></td>
+    <td>Standard Anthropic API key (pay-per-use)</td>
+  </tr>
+</table>
+
+<h3>Optional - Custom Gateway Token</h3>
+<table>
+  <tr><th>Variable</th><th>Value</th><th>Notes</th></tr>
+  <tr>
+    <td><code>OPENCLAW_GATEWAY_TOKEN</code></td>
+    <td>Any string you want</td>
+    <td>If not set, auto-generated on first boot (saved to volume)</td>
+  </tr>
+</table>
+
+<h3>Optional - Telegram Bot</h3>
+<table>
+  <tr><th>Variable</th><th>Value</th><th>Notes</th></tr>
+  <tr>
+    <td><code>TELEGRAM_BOT_TOKEN</code></td>
+    <td><code>1234567890:AAHx...</code></td>
+    <td>From @BotFather</td>
+  </tr>
+  <tr>
+    <td><code>TELEGRAM_DM_POLICY</code></td>
+    <td><code>allowlist</code></td>
+    <td>Options: <code>open</code>, <code>allowlist</code>, <code>pairing</code>, <code>disabled</code></td>
+  </tr>
+  <tr>
+    <td><code>TELEGRAM_ALLOW_FROM</code></td>
+    <td><code>123456789</code></td>
+    <td>Your Telegram user ID (get from @userinfobot). Comma-separated for multiple.</td>
+  </tr>
+</table>
+
+<h3>Optional - Additional AI Providers (fallback)</h3>
+<table>
+  <tr><th>Variable</th><th>Value</th><th>Notes</th></tr>
+  <tr>
+    <td><code>AWS_ACCESS_KEY_ID</code></td>
+    <td><code>AKIA...</code></td>
+    <td rowspan="3">For Amazon Bedrock (Claude via AWS credits). Use model: <code>bedrock/claude-opus-4-6</code></td>
+  </tr>
+  <tr><td><code>AWS_SECRET_ACCESS_KEY</code></td><td><code>wJal...</code></td></tr>
+  <tr><td><code>AWS_DEFAULT_REGION</code></td><td><code>us-east-1</code></td></tr>
+  <tr>
+    <td><code>GOOGLE_API_KEY</code></td>
+    <td><code>AIzaSy...</code></td>
+    <td>Google AI Studio. Use model: <code>google/gemini-2.5-pro</code></td>
+  </tr>
+  <tr>
+    <td><code>OPENAI_API_KEY</code></td>
+    <td><code>sk-...</code></td>
+    <td>OpenAI API key</td>
+  </tr>
+  <tr>
+    <td><code>BRAVE_API_KEY</code></td>
+    <td><code>BSA4...</code></td>
+    <td>For web search tool</td>
+  </tr>
+</table>
+
+<h3>Optional - MCP Integrations (Coming Soon)</h3>
+<div class="card warn">
+  <p><strong>Note:</strong> MCP server support (<code class="inline-code">mcp.servers</code> in config) is in OpenClaw's source code but not yet released. The <code class="inline-code">AIRTABLE_API_KEY</code> env var is ready for when it ships.</p>
+</div>
+
+<h3>Optional - Model Override</h3>
+<table>
+  <tr><th>Variable</th><th>Value</th><th>Notes</th></tr>
+  <tr>
+    <td><code>OPENCLAW_DEFAULT_MODEL</code></td>
+    <td><code>anthropic/claude-opus-4-6</code></td>
+    <td>Default: <code>anthropic/claude-sonnet-4-6</code>. Other options: <code>bedrock/claude-opus-4-6</code>, <code>google/gemini-2.5-pro</code></td>
+  </tr>
+</table>
+
+<!-- ===== STEP 4 ===== -->
+<h2 id="step4"><span class="step-num">4</span> Add Persistent Volume</h2>
+<ol>
+  <li>Click your service &rarr; <strong>Settings</strong> tab (or <strong>Volumes</strong> section)</li>
+  <li>Click <strong>Add Volume</strong></li>
+  <li>Mount path: <code class="inline-code">/data</code></li>
+  <li>Size: 1 GB is plenty</li>
+  <li>Click <strong>Save</strong></li>
+</ol>
+<div class="card warn">
+  <strong>Why this matters:</strong> Without a volume, every redeploy wipes the gateway token, auth profiles, and config. The volume persists data at <code class="inline-code">/data/.openclaw</code> across deploys.
+</div>
+
+<!-- ===== STEP 5 ===== -->
+<h2 id="step5"><span class="step-num">5</span> Deploy &amp; Verify</h2>
+<ol>
+  <li>After adding env vars and volume, Railway will auto-redeploy</li>
+  <li>Wait for status to show <span class="badge badge-green">SUCCESS</span> (1-3 minutes)</li>
+  <li>Railway auto-assigns a domain like <code class="inline-code">your-service-production-xxxx.up.railway.app</code></li>
+  <li>Test health: visit <code class="inline-code">https://your-domain.up.railway.app/healthz</code> &mdash; should return <code class="inline-code">{"ok":true}</code></li>
+  <li>Open web UI: <code class="inline-code">https://your-domain.up.railway.app/</code></li>
+  <li>Open chat: <code class="inline-code">https://your-domain.up.railway.app/chat</code></li>
+</ol>
+
+<!-- ===== STEP 6 ===== -->
+<h2 id="step6"><span class="step-num">6</span> Get Your Gateway Token</h2>
+<p>You need the gateway token to connect the web UI:</p>
+<ol>
+  <li>If you set <code class="inline-code">OPENCLAW_GATEWAY_TOKEN</code> as an env var, you already know it</li>
+  <li>If auto-generated, check the <strong>Deploy Logs</strong> in Railway &mdash; it prints:
+    <pre><code>===========================================
+  GATEWAY TOKEN (copy this!):
+  &lt;your-token-here&gt;
+===========================================</code></pre>
+  </li>
+  <li>Paste the token when the web UI asks for it</li>
+</ol>
+
+<!-- ===== CUSTOMIZATION ===== -->
+<h2 id="customize">Customization Guide</h2>
+
+<h3>Change the default AI model</h3>
+<p>Set the <code class="inline-code">OPENCLAW_DEFAULT_MODEL</code> env var in Railway:</p>
+<table>
+  <tr><th>Provider</th><th>Model Value</th><th>Auth Required</th></tr>
+  <tr><td>Anthropic (direct)</td><td><code>anthropic/claude-opus-4-6</code></td><td>Setup-token or API key</td></tr>
+  <tr><td>Anthropic (direct)</td><td><code>anthropic/claude-sonnet-4-6</code></td><td>Setup-token or API key</td></tr>
+  <tr><td>AWS Bedrock</td><td><code>bedrock/claude-opus-4-6</code></td><td>AWS credentials</td></tr>
+  <tr><td>Google AI</td><td><code>google/gemini-2.5-pro</code></td><td>Google API key</td></tr>
+  <tr><td>OpenAI</td><td><code>openai/gpt-4o</code></td><td>OpenAI API key</td></tr>
+</table>
+
+<h3>Add more Telegram users</h3>
+<p>Set <code class="inline-code">TELEGRAM_ALLOW_FROM</code> to comma-separated user IDs:</p>
+<pre><code>TELEGRAM_ALLOW_FROM=123456789,987654321</code></pre>
+
+<h3>Open Telegram to everyone</h3>
+<p>Set <code class="inline-code">TELEGRAM_DM_POLICY=open</code> (warning: anyone can use your bot and consume your credits)</p>
+
+<h3>Add more MCP servers</h3>
+<p>Edit the <code class="inline-code">mcp.servers</code> section in the entrypoint config. Each server needs:</p>
+<pre><code>"server-name": {
+  "command": "npx",
+  "args": ["-y", "@package/name"],
+  "env": { "API_KEY": "${ENV_VAR_NAME}" }
+}</code></pre>
+
+<!-- ===== TROUBLESHOOTING ===== -->
+<h2 id="troubleshoot">Troubleshooting (Known Fixes Already Applied)</h2>
+<p>This template has all these fixes baked in. Listed here for reference if you customize:</p>
+
+<div class="card danger">
+  <h3>Fix 1: "Invalid input - bind"</h3>
+  <p><strong>Cause:</strong> Using <code class="inline-code">"bind": "all"</code> in config</p>
+  <p><strong>Fix:</strong> Valid values are: <code class="inline-code">auto</code>, <code class="inline-code">lan</code>, <code class="inline-code">loopback</code>, <code class="inline-code">custom</code>, <code class="inline-code">tailnet</code>. This template uses <code class="inline-code">lan</code>.</p>
+</div>
+
+<div class="card danger">
+  <h3>Fix 2: "unknown option --state-dir"</h3>
+  <p><strong>Cause:</strong> <code class="inline-code">--state-dir</code> and <code class="inline-code">--workspace-dir</code> are not valid CLI flags</p>
+  <p><strong>Fix:</strong> Use env vars <code class="inline-code">OPENCLAW_STATE_DIR</code> and <code class="inline-code">OPENCLAW_WORKSPACE_DIR</code> instead. Use <code class="inline-code">--allow-unconfigured</code> flag.</p>
+</div>
+
+<div class="card danger">
+  <h3>Fix 3: "Proxy headers detected from untrusted address"</h3>
+  <p><strong>Cause:</strong> Railway's load balancer adds forwarded headers that OpenClaw's gateway doesn't trust</p>
+  <p><strong>Fix:</strong> Two things: (1) Add <code class="inline-code">"trustedProxies": ["127.0.0.1", "::1"]</code> to gateway config. (2) The Node.js reverse proxy strips <code class="inline-code">x-forwarded-*</code> headers before forwarding to the gateway.</p>
+</div>
+
+<div class="card danger">
+  <h3>Fix 4: "pairing required" for browser connections</h3>
+  <p><strong>Cause:</strong> OpenClaw requires device pairing even with valid token for remote browser access</p>
+  <p><strong>Fix:</strong> Add <code class="inline-code">"dangerouslyDisableDeviceAuth": true</code> to <code class="inline-code">gateway.controlUi</code> config.</p>
+</div>
+
+<div class="card danger">
+  <h3>Fix 5: "No API key found for provider anthropic"</h3>
+  <p><strong>Cause:</strong> auth-profiles.json written with wrong format (nested <code class="inline-code">credentials</code> object or missing <code class="inline-code">version</code>)</p>
+  <p><strong>Fix:</strong> Must have <code class="inline-code">"version": 1</code> at top level. Credentials (<code class="inline-code">type</code>, <code class="inline-code">provider</code>, <code class="inline-code">token</code>) go directly in each profile object, not nested.</p>
+</div>
+
+<div class="card danger">
+  <h3>Fix 6: "pairing required" for internal agent tools</h3>
+  <p><strong>Cause:</strong> Embedded agent connecting back to gateway failed because <code class="inline-code">OPENCLAW_GATEWAY_TOKEN</code> wasn't exported</p>
+  <p><strong>Fix:</strong> <code class="inline-code">export OPENCLAW_GATEWAY_TOKEN</code> before starting the gateway.</p>
+</div>
+
+<div class="card danger">
+  <h3>Fix 7: Stale config on persistent volume</h3>
+  <p><strong>Cause:</strong> First deploy wrote broken config to volume; subsequent deploys read the stale broken config</p>
+  <p><strong>Fix:</strong> Always regenerate config on every boot (the <code class="inline-code">if true; then</code> pattern). Never use <code class="inline-code">if [ ! -f config ]; then</code>.</p>
+</div>
+
+<div class="card danger">
+  <h3>Fix 8: Telegram "Unrecognized key" errors</h3>
+  <p><strong>Cause:</strong> Using wrong field names like <code class="inline-code">"dm"</code>, <code class="inline-code">"agent"</code>, <code class="inline-code">"allowlist"</code></p>
+  <p><strong>Fix:</strong> Correct fields are <code class="inline-code">"dmPolicy"</code>, <code class="inline-code">"allowFrom"</code>. No <code class="inline-code">"agent"</code> or <code class="inline-code">"dm"</code> wrapper object. Schema is strict.</p>
+</div>
+
+<!-- ===== ENV REFERENCE ===== -->
+<h2 id="env-reference">Environment Variable Reference</h2>
+<table>
+  <tr><th>Variable</th><th>Required</th><th>Description</th></tr>
+  <tr><td><code>ANTHROPIC_SETUP_TOKEN</code></td><td><span class="badge badge-green">Pick one</span></td><td>Claude subscription token (free usage)</td></tr>
+  <tr><td><code>ANTHROPIC_API_KEY</code></td><td><span class="badge badge-green">Pick one</span></td><td>Anthropic API key (pay-per-use)</td></tr>
+  <tr><td><code>OPENCLAW_GATEWAY_TOKEN</code></td><td><span class="badge badge-orange">Optional</span></td><td>Custom gateway auth token (auto-generated if not set)</td></tr>
+  <tr><td><code>OPENCLAW_DEFAULT_MODEL</code></td><td><span class="badge badge-orange">Optional</span></td><td>Default model (default: anthropic/claude-sonnet-4-6)</td></tr>
+  <tr><td><code>TELEGRAM_BOT_TOKEN</code></td><td><span class="badge badge-orange">Optional</span></td><td>Telegram bot token from @BotFather</td></tr>
+  <tr><td><code>TELEGRAM_DM_POLICY</code></td><td><span class="badge badge-orange">Optional</span></td><td>DM policy: open, allowlist, pairing, disabled (default: allowlist)</td></tr>
+  <tr><td><code>TELEGRAM_ALLOW_FROM</code></td><td><span class="badge badge-orange">Optional</span></td><td>Comma-separated Telegram user IDs for allowlist</td></tr>
+  <tr><td><code>AWS_ACCESS_KEY_ID</code></td><td><span class="badge badge-orange">Optional</span></td><td>AWS IAM access key for Bedrock</td></tr>
+  <tr><td><code>AWS_SECRET_ACCESS_KEY</code></td><td><span class="badge badge-orange">Optional</span></td><td>AWS IAM secret key for Bedrock</td></tr>
+  <tr><td><code>AWS_DEFAULT_REGION</code></td><td><span class="badge badge-orange">Optional</span></td><td>AWS region (e.g., us-east-1)</td></tr>
+  <tr><td><code>GOOGLE_API_KEY</code></td><td><span class="badge badge-orange">Optional</span></td><td>Google AI Studio API key</td></tr>
+  <tr><td><code>OPENAI_API_KEY</code></td><td><span class="badge badge-orange">Optional</span></td><td>OpenAI API key</td></tr>
+  <tr><td><code>BRAVE_API_KEY</code></td><td><span class="badge badge-orange">Optional</span></td><td>Brave Search API key</td></tr>
+  <tr><td><code>AIRTABLE_API_KEY</code></td><td><span class="badge badge-orange">Optional</span></td><td>Airtable Personal Access Token for MCP integration</td></tr>
+</table>
+
+<div class="card success" style="margin-top:2rem">
+  <h3>Architecture Summary</h3>
+  <pre style="background:transparent;border:none;padding:0;margin:0.5rem 0"><code>
+  Railway ($PORT)          Node.js Proxy           OpenClaw Gateway
+  ┌──────────────┐    ┌───────────────────┐    ┌──────────────────┐
+  │ HTTPS in     │───>│ Strip x-forwarded  │───>│ ws://0.0.0.0:    │
+  │ (Railway LB) │    │ headers, forward   │    │ 18789            │
+  │              │<───│ to localhost:18789 │<───│                  │
+  └──────────────┘    └───────────────────┘    └──────────────────┘
+       Port 8080         /healthz endpoint       Auth + WebSocket
+                         WebSocket upgrade       Telegram bot
+                                                 Canvas, Chat UI
+  </code></pre>
+  <p>The proxy exists because Railway terminates TLS and adds forwarded headers that OpenClaw doesn't trust. The proxy strips those headers and forwards everything (including WebSocket upgrades) to the gateway on localhost.</p>
+</div>
+
+<p style="color:var(--muted);margin-top:2rem;text-align:center;font-size:0.85rem">
+  Generated March 2026 | Template by Claude + Comasia AI
+</p>
+
+</body>
+</html>
