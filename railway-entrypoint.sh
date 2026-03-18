@@ -44,7 +44,6 @@ if true; then
   "channels": {
     "telegram": {
       "botToken": "${TELEGRAM_BOT_TOKEN}",
-      "agent": "main",
       "dmPolicy": "allowlist",
       "allowFrom": [8362202396]
     }
