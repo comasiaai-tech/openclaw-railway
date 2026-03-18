@@ -40,6 +40,12 @@ if true; then
   },
   "tools": {
     "web": { "search": {"enabled":true}, "fetch": {"enabled":true} }
+  },
+  "channels": {
+    "telegram": {
+      "botToken": "${TELEGRAM_BOT_TOKEN}",
+      "dm": { "policy": "allow", "agent": "main" }
+    }
   }
 }
 EOF
