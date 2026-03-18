@@ -41,17 +41,6 @@ if true; then
   "tools": {
     "web": { "search": {"enabled":true}, "fetch": {"enabled":true} }
   },
-  "mcp": {
-    "servers": {
-      "airtable": {
-        "command": "npx",
-        "args": ["-y", "@airtable/mcp-server"],
-        "env": {
-          "AIRTABLE_API_KEY": "${AIRTABLE_API_KEY}"
-        }
-      }
-    }
-  },
   "channels": {
     "telegram": {
       "botToken": "${TELEGRAM_BOT_TOKEN}",
