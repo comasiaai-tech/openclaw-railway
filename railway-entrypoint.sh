@@ -18,8 +18,8 @@ fi
 mkdir -p "${STATE_DIR}" "${WORKSPACE_DIR}"
 echo -n "${OPENCLAW_GATEWAY_TOKEN}" > "${STATE_DIR}/.gateway-token"
 
-# Generate config on first run only
-if [ ! -f "${CONFIG_FILE}" ]; then
+# Always regenerate config to pick up env var changes
+if true; then
   echo "==> Generating config..."
   MODEL="${OPENCLAW_DEFAULT_MODEL:-anthropic/claude-sonnet-4-6}"
   cat > "${CONFIG_FILE}" <<EOF
