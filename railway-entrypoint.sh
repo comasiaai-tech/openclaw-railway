@@ -67,6 +67,7 @@ echo "==========================================="
 
 export OPENCLAW_STATE_DIR="${STATE_DIR}"
 export OPENCLAW_WORKSPACE_DIR="${WORKSPACE_DIR}"
+export OPENCLAW_GATEWAY_TOKEN="${OPENCLAW_GATEWAY_TOKEN}"
 export HOME="/root"
 
 # Configure Anthropic setup-token auth if provided
