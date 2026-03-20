@@ -27,7 +27,7 @@ if true; then
   "gateway": {
     "mode": "local", "bind": "lan", "port": 18789,
     "trustedProxies": ["127.0.0.1", "::1"],
-    "auth": { "token": "${OPENCLAW_GATEWAY_TOKEN}", "pairingMode": "open" },
+    "auth": {},
     "controlUi": { "allowedOrigins": ["*"], "dangerouslyDisableDeviceAuth": true }
   },
   "agents": {
