@@ -25,7 +25,7 @@ if true; then
   cat > "${CONFIG_FILE}" <<EOF
 {
   "gateway": {
-    "mode": "local", "bind": "lan", "port": 18789,
+    "mode": "local", "bind": "loopback", "port": 18789,
     "trustedProxies": ["127.0.0.1", "::1"],
     "auth": { "mode": "none" },
     "controlUi": { "allowedOrigins": ["*"], "dangerouslyDisableDeviceAuth": true }
@@ -161,6 +161,6 @@ PROXYEOF
 node /tmp/proxy.js &
 echo "==> Starting OpenClaw gateway..."
 exec openclaw gateway \
-  --port 18789 --bind lan \
+  --port 18789 --bind loopback \
   --token "${OPENCLAW_GATEWAY_TOKEN}" \
   --allow-unconfigured
