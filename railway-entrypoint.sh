@@ -162,5 +162,4 @@ node /tmp/proxy.js &
 echo "==> Starting OpenClaw gateway..."
 exec openclaw gateway \
   --port 18789 --bind loopback \
-  --token "${OPENCLAW_GATEWAY_TOKEN}" \
   --allow-unconfigured
