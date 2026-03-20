@@ -27,7 +27,7 @@ if true; then
   "gateway": {
     "mode": "local", "bind": "lan", "port": 18789,
     "trustedProxies": ["127.0.0.1", "::1"],
-    "auth": { "token": "${OPENCLAW_GATEWAY_TOKEN}" },
+    "auth": { "token": "${OPENCLAW_GATEWAY_TOKEN}", "pairingMode": "open" },
     "controlUi": { "allowedOrigins": ["*"], "dangerouslyDisableDeviceAuth": true }
   },
   "agents": {
@@ -162,5 +162,4 @@ node /tmp/proxy.js &
 echo "==> Starting OpenClaw gateway..."
 exec openclaw gateway \
   --port 18789 --bind lan \
-  --token "${OPENCLAW_GATEWAY_TOKEN}" \
   --allow-unconfigured
