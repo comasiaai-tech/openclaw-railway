@@ -75,7 +75,21 @@ echo "==========================================="
 export OPENCLAW_STATE_DIR="${STATE_DIR}"
 export OPENCLAW_WORKSPACE_DIR="${WORKSPACE_DIR}"
 export OPENCLAW_GATEWAY_TOKEN="${OPENCLAW_GATEWAY_TOKEN}"
+export OPENCLAW_GATEWAY_URL="ws://127.0.0.1:18789"
 export HOME="/root"
+
+# Write gateway pairing so agent/cron can authenticate to gateway
+mkdir -p "${STATE_DIR}"
+cat > "${STATE_DIR}/gateway-pairing.json" <<PAIREOF
+{
+  "version": 1,
+  "gateway": {
+    "url": "ws://127.0.0.1:18789",
+    "token": "${OPENCLAW_GATEWAY_TOKEN}"
+  }
+}
+PAIREOF
+echo "==> Gateway pairing written"
 
 # Configure Anthropic setup-token auth if provided
 if [ -n "${ANTHROPIC_SETUP_TOKEN:-}" ]; then
