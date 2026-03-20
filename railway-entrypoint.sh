@@ -27,8 +27,8 @@ if true; then
   "gateway": {
     "mode": "local", "bind": "loopback", "port": 18789,
     "trustedProxies": ["127.0.0.1", "::1"],
-    "auth": { "mode": "none" },
-    "controlUi": { "allowedOrigins": ["*"], "dangerouslyDisableDeviceAuth": true }
+    "auth": { "mode": "token", "token": "${OPENCLAW_GATEWAY_TOKEN}" },
+    "controlUi": { "allowedOrigins": ["*"] }
   },
   "agents": {
     "defaults": {
