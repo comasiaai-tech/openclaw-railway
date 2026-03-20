@@ -27,7 +27,7 @@ if true; then
   "gateway": {
     "mode": "local", "bind": "lan", "port": 18789,
     "trustedProxies": ["127.0.0.1", "::1"],
-    "auth": {},
+    "auth": { "token": "${OPENCLAW_GATEWAY_TOKEN}" },
     "controlUi": { "allowedOrigins": ["*"], "dangerouslyDisableDeviceAuth": true }
   },
   "agents": {
@@ -75,7 +75,7 @@ echo "==========================================="
 export OPENCLAW_STATE_DIR="${STATE_DIR}"
 export OPENCLAW_WORKSPACE_DIR="${WORKSPACE_DIR}"
 export OPENCLAW_GATEWAY_TOKEN="${OPENCLAW_GATEWAY_TOKEN}"
-export OPENCLAW_GATEWAY_URL="ws://127.0.0.1:18789"
+export OPENCLAW_GATEWAY_URL="ws://127.0.0.1:18789?token=${OPENCLAW_GATEWAY_TOKEN}"
 export HOME="/root"
 
 # Write gateway pairing so agent/cron can authenticate to gateway
@@ -162,4 +162,5 @@ node /tmp/proxy.js &
 echo "==> Starting OpenClaw gateway..."
 exec openclaw gateway \
   --port 18789 --bind lan \
+  --token "${OPENCLAW_GATEWAY_TOKEN}" \
   --allow-unconfigured
