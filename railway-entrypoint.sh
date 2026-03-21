@@ -46,6 +46,11 @@ if true; then
       "botToken": "${TELEGRAM_BOT_TOKEN}",
       "dmPolicy": "allowlist",
       "allowFrom": [8362202396]
+    },
+    "discord": {
+      "botToken": "${DISCORD_BOT_TOKEN}",
+      "guildId": "1484972352583241888",
+      "allowFrom": ["1484972008361164961"]
     }
   }
 }
