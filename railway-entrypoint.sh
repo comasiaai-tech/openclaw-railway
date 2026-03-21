@@ -49,7 +49,7 @@ if true; then
     },
     "discord": {
       "allowFrom": ["1484972008361164961"],
-      "execApprovals": true
+      "execApprovals": { "enabled": true }
     }
   }
 }
