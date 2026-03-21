@@ -48,8 +48,7 @@ if true; then
       "allowFrom": [8362202396]
     },
     "discord": {
-      "allowFrom": ["1484972008361164961"],
-      "execApprovals": { "enabled": true }
+      "allowFrom": ["1484972008361164961"]
     }
   }
 }
