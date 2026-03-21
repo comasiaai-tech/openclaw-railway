@@ -50,7 +50,7 @@ if true; then
     "discord": {
       "allowFrom": ["1484972008361164961"],
       "execApprovals": { "enabled": true, "target": "dm" },
-      "guilds": ["1484972352583241888"]
+      "guilds": { "1484972352583241888": {} }
     }
   }
 }
